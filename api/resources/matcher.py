@@ -17,7 +17,6 @@ def excel_data_parser(data):
     return data
 
 
-6
 post_parser = reqparse.RequestParser()
 post_parser.add_argument('schoolData', type=excel_data_parser, required=True)
 post_parser.add_argument('teacherData', type=excel_data_parser, required=True)
