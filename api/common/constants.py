@@ -1,0 +1,1 @@
+EXCEL_FILE_EXTENSIONS = ['xls', 'xlsx']
