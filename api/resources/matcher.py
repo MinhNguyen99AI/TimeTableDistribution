@@ -28,3 +28,6 @@ class Matcher(Resource):
     def post(self):
         args = post_parser.parse_args()
         return matchService.match(args['schoolData'], args['teacherData'])
+
+    def get(self):
+        return 
