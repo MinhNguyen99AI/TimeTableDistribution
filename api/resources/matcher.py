@@ -1,7 +1,8 @@
-from flask_restful import Resource, fields, marshal_with, reqparse
-from flask import request
+from flask_restful import Resource, reqparse
+from flask import request, send_file
 from resources.services import matchService
 from common.constants import *
+import io
 
 
 def excel_data_parser(data):
@@ -24,10 +25,11 @@ post_parser.add_argument('teacherData', type=excel_data_parser, required=True)
 
 class Matcher(Resource):
 
-    # @marshal_with(post_matcher_fields)
     def post(self):
         args = post_parser.parse_args()
-        return matchService.match(args['schoolData'], args['teacherData'])
-
-    def get(self):
-        return 
+        result_bin = matchService.match(
+            args['schoolData'], args['teacherData'])
+        return send_file(
+            io.BytesIO(result_bin),
+            download_name="Kết quả.zip",
+            mimetype='application/zip')
