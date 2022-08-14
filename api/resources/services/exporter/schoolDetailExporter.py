@@ -3,10 +3,11 @@ import pandas as pd
 
 class SchoolDetailExporter:
     def __init__(self, df, name):
-
         self.df = df
         self.name = name
+        self.preprocess_df()
 
+    def preprocess_df(self):
         self.df['Buổi'] = self.df.apply(
             lambda row: "Sáng" if row['Tiet_Trong_Ngay'] < 5 else "Chiều", axis=1)
         self.df['Lớp'] = self.df.apply(lambda row: str(

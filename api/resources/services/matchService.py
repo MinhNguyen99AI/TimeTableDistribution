@@ -6,6 +6,7 @@ import numpy as np
 import pandas as pd
 import math
 from resources.services.exporter.schoolDetailExporter import SchoolDetailExporter
+from resources.services.exporter.teacherDetailExporter import TeacherDetailExporter
 
 
 def create_Truong_DataFrame(df):
@@ -79,6 +80,8 @@ def match(school_data, teacher_data) -> bytes:
     # print(df_teacher.head())
 
     df_result = pd.read_excel("api/resources/examples/[RESULTS] GVNN.xlsx")
-    school_detail_exporter = SchoolDetailExporter(
+    school_detail = SchoolDetailExporter(
         df_result, "school-detail.xlsx")
-    return zipExporters([school_detail_exporter])
+    teacher_detail = TeacherDetailExporter(df_result, "teacher-detail.xlsx")
+
+    return zipExporters([school_detail, teacher_detail])
