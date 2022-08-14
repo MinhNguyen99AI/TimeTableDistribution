@@ -73,6 +73,10 @@ class TeacherMasterExporter:
             worksheet.set_column(0, 0, 20)  # set column width Tên
             worksheet.set_column(1, 1, 20)  # set column width Buổi
 
+            worksheet.merge_range("C3:N3", None)
+            for i in range(len(df.index)):
+                worksheet.merge_range(3 + i*2, 3, 3 + i*2 + 1, 3, None)
+
             for idx, col in enumerate(df, 2):  # loop through all columns
                 col_len = 10
                 if "Lớp" in col:
