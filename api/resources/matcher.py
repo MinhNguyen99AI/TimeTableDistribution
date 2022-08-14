@@ -20,7 +20,10 @@ def excel_data_parser(data):
 
 post_parser = reqparse.RequestParser()
 post_parser.add_argument('schoolData', type=excel_data_parser, required=True)
-post_parser.add_argument('teacherData', type=excel_data_parser, required=True)
+post_parser.add_argument('teacherDomesticData',
+                         type=excel_data_parser, required=True)
+post_parser.add_argument('teacherForeignData',
+                         type=excel_data_parser, required=True)
 
 
 class Matcher(Resource):
@@ -28,7 +31,7 @@ class Matcher(Resource):
     def post(self):
         args = post_parser.parse_args()
         result_bin = matchService.match(
-            args['schoolData'], args['teacherData'])
+            args['schoolData'], args['teacherDomesticData'], args['teacherForeignData'])
         return send_file(
             io.BytesIO(result_bin),
             download_name="Kết quả.zip",
