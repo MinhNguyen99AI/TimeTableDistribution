@@ -1,3 +1,4 @@
+from email import header
 import pandas as pd
 
 
@@ -55,19 +56,34 @@ class SchoolDetailExporter:
 
         return school_schedule
 
+    def add_headers(self, worksheet):
+        worksheet.write(2, 0, "SÁNG", self.header_style)
+        worksheet.merge_range(2, 0, 5, 0, None)
+        worksheet.write(7, 0, "CHIỀU", self.header_style)
+        worksheet.merge_range(7, 0, 10, 0, None)
+        worksheet.write(1, 1, "Giáo viên", self.header_style)
+        worksheet.write(6, 1, "Giáo viên", self.header_style)
+
+        worksheet.write(0, 0, "Buổi", self.header_style)
+        worksheet.write(0, 1, "Tiết", self.header_style)
+
+        for i in range(1, 5):
+            worksheet.write(1 + i, 1, i, self.header_style)
+            worksheet.write(6 + i, 1, i, self.header_style)
+
     def process(self, buffer):
         writer = pd.ExcelWriter(buffer, engine='xlsxwriter')
 
         workbook = writer.book
 
-        header_style = workbook.add_format(
+        self.header_style = workbook.add_format(
             {
                 'bold': True,
                 'border': True,
                 'align': 'center'
             })
 
-        cell_style = workbook.add_format(
+        self.cell_style = workbook.add_format(
             {
                 'border': True,
                 'align': 'center'
@@ -75,59 +91,45 @@ class SchoolDetailExporter:
 
         for school in self.df["Ten Truong"].unique().tolist():
             schedule = self.getSchoolSchedule(school)
-            worksheet = workbook.add_worksheet(school[:30])
+            self.worksheet = workbook.add_worksheet(school[:30])
 
-            worksheet.write(2, 0, "SÁNG", header_style)
-            worksheet.merge_range(2, 0, 5, 0, None)
-            worksheet.write(7, 0, "CHIỀU", header_style)
-            worksheet.merge_range(7, 0, 10, 0, None)
-            worksheet.write(1, 1, "Giáo viên", header_style)
-            worksheet.write(6, 1, "Giáo viên", header_style)
-
-            worksheet.write(0, 0, "Buổi", header_style)
-            worksheet.write(0, 1, "Tiết", header_style)
-
-            for i in range(1, 5):
-                worksheet.write(1 + i, 1, i, header_style)
-                worksheet.write(6 + i, 1, i, header_style)
+            self.add_headers(self.worksheet)
 
             current_col = 2
             for day in ['2', '3', '4', '5', '6']:
-                worksheet.write(
-                    0, current_col, "Thứ {}".format(day), header_style)
+                self.worksheet.write(
+                    0, current_col, "Thứ {}".format(day), self.header_style)
                 col_width = max(1, len(schedule[day]["Sáng"]), len(
                     schedule[day]["Chiều"]))
                 # Set Column size
-                worksheet.set_column(
+                self.worksheet.set_column(
                     current_col, current_col + col_width - 1, 20)
                 if col_width > 1:
-                    worksheet.merge_range(
+                    self.worksheet.merge_range(
                         0, current_col, 0, current_col + col_width - 1, None)
 
-                for idx, (teacher, classes) in enumerate(schedule[day]['Sáng'].items()):
-                    worksheet.write(1, current_col + idx,
-                                    teacher, header_style)
-                    for period, cls in enumerate(classes):
-                        worksheet.write(
-                            2 + period, current_col + idx, cls, cell_style)
-
-                for col in range(current_col + len(schedule[day]['Sáng']), current_col + col_width):
-                    worksheet.write_blank(1, col, '', header_style)
-                    for i in range(2, 6):
-                        worksheet.write_blank(i, col, '', cell_style)
-
-                for idx, (teacher, classes) in enumerate(schedule[day]['Chiều'].items()):
-                    worksheet.write(6, current_col + idx,
-                                    teacher, header_style)
-                    for period, cls in enumerate(classes):
-                        worksheet.write(
-                            7 + period, current_col + idx, cls, cell_style)
-
-                for col in range(current_col + len(schedule[day]['Chiều']), current_col + col_width):
-                    worksheet.write_blank(6, col, '', header_style)
-                    for i in range(7, 11):
-                        worksheet.write_blank(i, col, '', cell_style)
+                for session in ["Sáng", "Chiều"]:
+                    self.writeSchedule(schedule, session, day,
+                                       current_col, col_width)
 
                 current_col += col_width
 
         writer.save()
+
+    def writeSchedule(self, schedule, session, day, current_col, col_width):
+        if session == "Sáng":
+            header_row = 1
+        else:
+            header_row = 6
+
+        for idx, (teacher, classes) in enumerate(schedule[day][session].items()):
+            self.worksheet.write(header_row, current_col + idx,
+                                 teacher, self.header_style)
+            for period, cls in enumerate(classes):
+                self.worksheet.write(
+                    header_row + 1 + period, current_col + idx, cls, self.cell_style)
+
+        for col in range(current_col + len(schedule[day][session]), current_col + col_width):
+            self.worksheet.write_blank(1, col, '', self.header_style)
+            for i in range(header_row + 1, header_row + 5):
+                self.worksheet.write_blank(i, col, '', self.cell_style)

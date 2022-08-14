@@ -20,3 +20,7 @@ def zipExporters(exporters) -> bytes:
             with zf.open(exporter.getName(), "w") as buffer:
                 exporter.process(buffer)
     return memfile.getvalue()
+
+def is_one_val(s: pd.DataFrame):
+        a = s.to_numpy()
+        return (a[0] == a).all()
