@@ -13,13 +13,10 @@ def readDataframeFrombase64(data: str, sheetName: str = None) -> pd.DataFrame:
     return df
 
 
-def zipDataFrames(dfs: List[pd.DataFrame], names: List[str]) -> bytes:
-    if len(dfs) != len(names):
-        raise ValueError("Df and names length do not match")
-
+def zipExporters(exporters) -> bytes:
     memfile = io.BytesIO()
     with ZipFile(memfile, mode='w') as zf:
-        for df, name in zip(dfs, names):
-            with zf.open(name, "w") as buffer:
-                df.to_excel(buffer, index=False)
+        for exporter in exporters:
+            with zf.open(exporter.getName(), "w") as buffer:
+                exporter.process(buffer)
     return memfile.getvalue()

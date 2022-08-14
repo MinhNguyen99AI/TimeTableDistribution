@@ -1,10 +1,11 @@
-from common.util import readDataframeFrombase64, zipDataFrames
+from common.util import readDataframeFrombase64, zipExporters
 from common.constants import *
 
 from resources.services.geocodingService import get_coordinates
 import numpy as np
 import pandas as pd
 import math
+from resources.services.exporter.schoolDetailExporter import SchoolDetailExporter
 
 
 def create_Truong_DataFrame(df):
@@ -71,9 +72,13 @@ def match(school_data, teacher_data) -> bytes:
     df_school = readDataframeFrombase64(school_data['data'])
     df_teacher = readDataframeFrombase64(teacher_data['data'])
 
-    df_school = create_Truong_DataFrame(df_school)
-    df_teacher = create_GV_DataFrame(df_teacher)
+    # df_school = create_Truong_DataFrame(df_school)
+    # df_teacher = create_GV_DataFrame(df_teacher)
 
-    print(df_school.head())
-    print(df_teacher.head())
-    return zipDataFrames([df_school, df_teacher], ["school.xlsx", "teacher.xlsx"])
+    # print(df_school.head())
+    # print(df_teacher.head())
+
+    df_result = pd.read_excel("api/resources/examples/[RESULTS] GVNN.xlsx")
+    school_detail_exporter = SchoolDetailExporter(
+        df_result, "school-detail.xlsx")
+    return zipExporters([school_detail_exporter])
