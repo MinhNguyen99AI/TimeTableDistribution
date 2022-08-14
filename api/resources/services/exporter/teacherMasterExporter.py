@@ -1,5 +1,5 @@
 import pandas as pd
-from common.util import is_one_val
+from common.util import isOneVal
 
 
 class TeacherMasterExporter:
@@ -32,7 +32,7 @@ class TeacherMasterExporter:
                 for day in range(2, 6 + 1):
                     sub_df = self.df[(self.df["Ten Giao Vien Duoc Xep"] == name) & (
                         self.df["Buổi"] == session) & (self.df["Thu"] == day)]
-                    if not is_one_val(sub_df["Ten Truong"]):
+                    if not isOneVal(sub_df["Ten Truong"]):
                         raise ValueError(
                             "Giáo viên {} dạy nhiều trường trong buổi {} thứ {}".format(name, session, day))
 
