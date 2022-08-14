@@ -7,6 +7,7 @@ import pandas as pd
 import math
 from resources.services.exporter.schoolDetailExporter import SchoolDetailExporter
 from resources.services.exporter.teacherDetailExporter import TeacherDetailExporter
+from resources.services.exporter.teacherMasterExporter import TeacherMasterExporter
 
 
 def create_Truong_DataFrame(df):
@@ -70,8 +71,8 @@ def create_GV_DataFrame(df):
 
 
 def match(school_data, teacher_data) -> bytes:
-    df_school = readDataframeFrombase64(school_data['data'])
-    df_teacher = readDataframeFrombase64(teacher_data['data'])
+    # df_school = readDataframeFrombase64(school_data['data'])
+    # df_teacher = readDataframeFrombase64(teacher_data['data'])
 
     # df_school = create_Truong_DataFrame(df_school)
     # df_teacher = create_GV_DataFrame(df_teacher)
@@ -80,8 +81,8 @@ def match(school_data, teacher_data) -> bytes:
     # print(df_teacher.head())
 
     df_result = pd.read_excel("api/resources/examples/[RESULTS] GVNN.xlsx")
-    school_detail = SchoolDetailExporter(
-        df_result, "school-detail.xlsx")
+    school_detail = SchoolDetailExporter(df_result, "school-detail.xlsx")
     teacher_detail = TeacherDetailExporter(df_result, "teacher-detail.xlsx")
+    teacher_master = TeacherMasterExporter(df_result, "teacher-master.xlsx")
 
-    return zipExporters([school_detail, teacher_detail])
+    return zipExporters([school_detail, teacher_detail, teacher_master])
