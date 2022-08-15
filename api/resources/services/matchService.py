@@ -71,15 +71,15 @@ def create_GV_DataFrame(df):
 
 
 def match(school_data, teacher_domestic_data, teacher_foreign_data) -> bytes:
-    df_school = readDataframeFrombase64(school_data['data'])
-    df_teacher_domestic = readDataframeFrombase64(
-        teacher_domestic_data['data'])
-    df_teacher_foreign = readDataframeFrombase64(teacher_foreign_data['data'])
+    # df_school = readDataframeFrombase64(school_data['data'])
+    # df_teacher_domestic = readDataframeFrombase64(
+    #     teacher_domestic_data['data'])
+    # df_teacher_foreign = readDataframeFrombase64(teacher_foreign_data['data'])
 
     # df_school = create_Truong_DataFrame(df_school)
     # df_teacher_foreign = create_GV_DataFrame(teacher_foreign_data)
 
-    df_result = pd.read_excel("api/resources/examples/[RESULTS] GVNN.xlsx")
+    df_result = pd.read_excel("api/resources/examples/[RESULTS] GVNN-1.xlsx")
     school_detail = SchoolDetailExporter(df_result, "school-detail.xlsx")
     teacher_detail = TeacherDetailExporter(df_result, "teacher-detail.xlsx")
     teacher_master = TeacherMasterExporter(df_result, "teacher-master.xlsx")

@@ -1,11 +1,11 @@
 import pandas as pd
 from operator import add
-from common.util import getDayFromNum
+from common.util import getDayFromNum, getClassName
 
 
 class TeacherDetailExporter:
     def __init__(self, df, name):
-        self.df = df
+        self.df = df.copy(deep=True)
         self.name = name
         self.vi_session = {"Morning": "Sáng", "Afternoon": "Chiều"}
 
@@ -14,8 +14,7 @@ class TeacherDetailExporter:
     def preprocess_df(self):
         self.df['Buổi'] = self.df.apply(
             lambda row: "Sáng" if row['Tiet_Trong_Ngay'] < 5 else "Chiều", axis=1)
-        self.df['Lớp'] = self.df.apply(lambda row: str(
-            int(row['Khoi'])) + 'A' + str(int(row['Lop so'])), axis=1)
+        self.df['Lớp'] = self.df.apply(getClassName, axis=1)
         self.df['Document'] = self.df.apply(
             lambda row: "Tieng Anh " + str(int(row['Khoi'])), axis=1)
         self.df["Tiet trong buoi"] = self.df.apply(

@@ -1,17 +1,17 @@
 import pandas as pd
+from common.util import getClassName
 
 
 class SchoolDetailExporter:
     def __init__(self, df, name):
-        self.df = df
+        self.df = df.copy(deep=True)
         self.name = name
         self.preprocess_df()
 
     def preprocess_df(self):
         self.df['Buổi'] = self.df.apply(
             lambda row: "Sáng" if row['Tiet_Trong_Ngay'] < 5 else "Chiều", axis=1)
-        self.df['Lớp'] = self.df.apply(lambda row: str(
-            int(row['Khoi'])) + 'A' + str(int(row['Lop so'])), axis=1)
+        self.df['Lớp'] = self.df.apply(getClassName, axis=1)
         self.df["Tiet trong buoi"] = self.df.apply(
             lambda row: int(row['Tiet_Trong_Ngay'] % 4 + 1), axis=1)
 

@@ -52,3 +52,14 @@ def getDayFromNum(dayNum):
     if dayNum == 7:
         return "Saturday"
     return "Sunday"
+
+def getClassName(row):
+    class_type = 'DT'
+    if row["Chuong Trinh"] == "1 Chat Luong Cao":
+        class_type = 'CLC'
+    if row["Chuong Trinh"] == "2 Khoa Hoc":
+        class_type = 'KH'
+    if row["Chuong Trinh"] == "2 Toan":
+        class_type = 'T'
+
+    return "{}{}{}".format(int(row['Khoi']), class_type, int(row['Lop so']))

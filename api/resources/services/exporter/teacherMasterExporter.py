@@ -4,7 +4,7 @@ from common.util import isOneVal
 
 class TeacherMasterExporter:
     def __init__(self, df, name):
-        self.df = df
+        self.df = df.copy(deep=True)
         self.name = name
         self.preprocess_df()
 
@@ -32,9 +32,6 @@ class TeacherMasterExporter:
                 for day in range(2, 6 + 1):
                     sub_df = self.df[(self.df["Ten Giao Vien Duoc Xep"] == name) & (
                         self.df["Buổi"] == session) & (self.df["Thu"] == day)]
-                    if not isOneVal(sub_df["Ten Truong"]):
-                        raise ValueError(
-                            "Giáo viên {} dạy nhiều trường trong buổi {} thứ {}".format(name, session, day))
 
                     class_per_session += len(sub_df)
                     clazz = ""
