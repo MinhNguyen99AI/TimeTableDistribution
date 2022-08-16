@@ -129,6 +129,6 @@ class SchoolDetailExporter:
                     header_row + 1 + period, current_col + idx, cls, self.cell_style)
 
         for col in range(current_col + len(schedule[day][session]), current_col + col_width):
-            self.worksheet.write_blank(1, col, '', self.header_style)
+            self.worksheet.write_blank(header_row, col, '', self.header_style)
             for i in range(header_row + 1, header_row + 5):
                 self.worksheet.write_blank(i, col, '', self.cell_style)
