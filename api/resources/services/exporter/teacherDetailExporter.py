@@ -16,7 +16,7 @@ class TeacherDetailExporter:
             lambda row: "Sáng" if row['Tiet_Trong_Ngay'] < 5 else "Chiều", axis=1)
         self.df['Lớp'] = self.df.apply(getClassName, axis=1)
         self.df['Document'] = self.df.apply(
-            lambda row: "Tieng Anh " + str(int(row['Khoi'])), axis=1)
+            lambda row: row["Document"], axis=1)
         self.df["Tiet trong buoi"] = self.df.apply(
             lambda row: int(row['Tiet_Trong_Ngay'] % 4 + 1), axis=1)
 

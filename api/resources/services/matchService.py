@@ -638,9 +638,10 @@ def match(school_data, teacher_domestic_data, teacher_foreign_data) -> bytes:
 
     gvnn_result, gvvn_result = run(df_truong, df_GVNN, df_GVVN)
     print("Finished main process, writing to files...")
+    # gvnn_result = pd.read_excel("D:/Projects/[RESULTS] GVNN.xlsx")
+    # gvvn_result = pd.read_excel("D:/Projects/[RESULTS] GVVN.xlsx")
 
-    # df_result = pd.read_excel("api/resources/examples/[RESULTS] GVNN-1.xlsx")
-    df_all_result = gvnn_result.append(gvvn_result).reset_index()
+    df_all_result = pd.concat([gvnn_result, gvvn_result]).reset_index()
 
     school_detail = SchoolDetailExporter(
         df_all_result, "TKB chi tiết trường.xlsx")

@@ -51,6 +51,7 @@ class TeacherMasterExporter:
 
             for d in sessions:
                 d["Tổng tiết"] = total_class
+                d["Tổng giờ"] = total_class * 2/3
 
             gv_master_dict += sessions
 
@@ -71,8 +72,10 @@ class TeacherMasterExporter:
             worksheet.set_column(1, 1, 20)  # set column width Buổi
 
             worksheet.merge_range("C3:N3", None)
+            # merge tổng tiết + tổng giờ
             for i in range(len(df.index)):
                 worksheet.merge_range(3 + i*2, 3, 3 + i*2 + 1, 3, None)
+                worksheet.merge_range(3 + i*2, 4, 3 + i*2 + 1, 4, None)
 
             for idx, col in enumerate(df, 2):  # loop through all columns
                 col_len = 10
