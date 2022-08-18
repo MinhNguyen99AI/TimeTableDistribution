@@ -6,7 +6,10 @@ import numpy as np
 import pandas as pd
 import math
 from tqdm import tqdm
-import os
+import datetime
+
+from resources.repository.mongodb import *
+from bson.objectid import ObjectId
 
 from resources.services.exporter.schoolDetailExporter import SchoolDetailExporter
 from resources.services.exporter.teacherDetailExporter import TeacherDetailExporter
@@ -562,7 +565,7 @@ def create_matching_order_truong_VIETNAM(df_truong):
     return matching_order_truong
 
 
-def run(df_truong, df_GVNN, df_GVVN):
+def run(df_truong, df_GVNN, df_GVVN, id):
     ##### MATCHING GVNN #####
     #### check if tu chon lich ####
     if tu_chon_lich_checker(df_truong) == True:
@@ -573,17 +576,21 @@ def run(df_truong, df_GVNN, df_GVVN):
             df_truong)
 
     # Retrieve toa do #
-    print("Start coordinate school")
     df_location = create_Dia_Chi_Truong_DataFrame(df_diachitruong)
     df_location = same_name_checker_truong(df_location)
+
+    schedule_collection.find_one_and_update({"_id": ObjectId(
+        id)}, {'$set': {"status": SCHEDULE_STATUS["SCHOOL_COORDINATE_DONE"]}})
     print("Finished coordinate school")
     ### GVNN ###
 
     # Retrieve distance matrix cho GVNN
-    print("Start coordinate foreign teacher")
     df_GV = create_matching_GV(create_GV_dataframe(df_GVNN))
     df_GV = same_name_checker(df_GV)
     distance_matrix = construct_distance_matrix(df_GV, df_location)
+
+    schedule_collection.find_one_and_update({"_id": ObjectId(
+        id)}, {'$set': {"status": SCHEDULE_STATUS["FOREIGN_COORDINATE_DONE"]}})
     print("Finished coordinate foreign teacher")
 
     matching_order_truong = create_matching_order_truong(df_truong_processed)
@@ -600,14 +607,17 @@ def run(df_truong, df_GVNN, df_GVVN):
                                                               kind='quicksort', na_position='first', ignore_index=True, key=None)
 
     gvnn_result = matching_order_truong.copy()
-
+    schedule_collection.find_one_and_update(
+        {"_id": ObjectId(id)}, {'$set': {"status": SCHEDULE_STATUS["MATCHED_FOREIGN"]}})
     #### MATCHING GVVN ####
 
     # Retrieve distance matrix cho GVVN
-    print("Start coordinate domestic teacher")
     df_GV = create_matching_GV(create_GV_dataframe(df_GVVN))
     df_GV = same_name_checker(df_GV)
     distance_matrix = construct_distance_matrix(df_GV, df_location)
+
+    schedule_collection.find_one_and_update({"_id": ObjectId(
+        id)}, {'$set': {"status": SCHEDULE_STATUS["DOMESTIC_COORDINATE_DONE"]}})
     print("Finished coordinate domestic teacher")
 
     matching_order_truong = create_matching_order_truong_VIETNAM(
@@ -625,21 +635,14 @@ def run(df_truong, df_GVNN, df_GVVN):
                                                               kind='quicksort', na_position='first', ignore_index=True, key=None)
 
     gvvn_result = matching_order_truong.copy()
+
+    schedule_collection.find_one_and_update({"_id": ObjectId(
+        id)}, {'$set': {"status": SCHEDULE_STATUS["MATCHED_DOMESTIC"]}})
     return gvnn_result, gvvn_result
 
 
-def match(school_data, teacher_domestic_data, teacher_foreign_data) -> bytes:
-    tqdm.pandas()
-    df_truong = readDataframeFrombase64(school_data['data'])
-    df_GVVN = readDataframeFrombase64(
-        teacher_domestic_data['data'])
-    df_GVNN = readDataframeFrombase64(teacher_foreign_data['data'])
-    print("Done read input")
-
-    gvnn_result, gvvn_result = run(df_truong, df_GVNN, df_GVVN)
-    print("Finished main process, writing to files...")
-    # gvnn_result = pd.read_excel("D:/Projects/[RESULTS] GVNN.xlsx")
-    # gvvn_result = pd.read_excel("D:/Projects/[RESULTS] GVVN.xlsx")
+def job(df_truong, df_GVNN, df_GVVN, id):
+    gvnn_result, gvvn_result = run(df_truong, df_GVNN, df_GVVN, id)
 
     df_all_result = pd.concat([gvnn_result, gvvn_result]).reset_index()
 
@@ -656,4 +659,25 @@ def match(school_data, teacher_domestic_data, teacher_foreign_data) -> bytes:
     gvvn_master = TeacherMasterExporter(
         gvvn_result, "TKB GVVN - tổng.xlsx")
 
-    return zipExporters([school_detail, gvnn_detail, gvnn_master, gvvn_detail, gvvn_master])
+    result_bytes = zipExporters(
+        [school_detail, gvnn_detail, gvnn_master, gvvn_detail, gvvn_master])
+
+    schedule_collection.find_one_and_update({"_id": ObjectId(
+        id)}, {'$set': {"status": SCHEDULE_STATUS["FINISHED"], "data": result_bytes}})
+
+
+def match(school_data, teacher_domestic_data, teacher_foreign_data) -> bytes:
+    tqdm.pandas()
+    df_truong = readDataframeFrombase64(school_data['data'])
+    df_GVVN = readDataframeFrombase64(
+        teacher_domestic_data['data'])
+    df_GVNN = readDataframeFrombase64(teacher_foreign_data['data'])
+
+    result = schedule_collection.insert_one(
+        {"status": SCHEDULE_STATUS["PENDING"], "createdDate": datetime.datetime.utcnow()})
+
+    id = str(result.inserted_id)
+
+    job(df_truong, df_GVNN, df_GVVN, id)
+
+    return {"id": id}

@@ -1,8 +1,8 @@
 from flask_restful import Resource, reqparse
-from flask import request, send_file
 from resources.services import matchService
 from common.constants import *
-import io
+from resources.repository.mongodb import *
+
 
 
 def excel_data_parser(data):
@@ -29,9 +29,5 @@ post_parser.add_argument('teacherForeignData',
 class Matcher(Resource):
     def post(self):
         args = post_parser.parse_args()
-        result_bin = matchService.match(
+        return matchService.match(
             args['schoolData'], args['teacherDomesticData'], args['teacherForeignData'])
-        return send_file(
-            io.BytesIO(result_bin),
-            download_name="Kết quả.zip",
-            mimetype='application/zip')
