@@ -27,7 +27,6 @@ post_parser.add_argument('teacherForeignData',
 
 
 class Matcher(Resource):
-
     def post(self):
         args = post_parser.parse_args()
         result_bin = matchService.match(
