@@ -1,7 +1,6 @@
 from common.util import readDataframeFrombase64, zipExporters
 from common.constants import *
 
-from resources.services.geocodingService import get_coordinates
 import numpy as np
 import pandas as pd
 import math
@@ -15,6 +14,7 @@ from resources.services.exporter.schoolDetailExporter import SchoolDetailExporte
 from resources.services.exporter.teacherDetailExporter import TeacherDetailExporter
 from resources.services.exporter.teacherMasterExporter import TeacherMasterExporter
 
+from threading import Thread
 
 ### API LOCATION ###
 from geopy.extra.rate_limiter import RateLimiter
@@ -678,6 +678,8 @@ def match(school_data, teacher_domestic_data, teacher_foreign_data) -> bytes:
 
     id = str(result.inserted_id)
 
-    job(df_truong, df_GVNN, df_GVVN, id)
+    # Start async job
+    thread = Thread(target=job, args=(df_truong, df_GVNN, df_GVVN, id))
+    thread.start()
 
     return {"id": id}
