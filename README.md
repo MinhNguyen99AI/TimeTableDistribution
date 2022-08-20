@@ -16,3 +16,9 @@ docker build --tag timetable-flask-api:1.0.0 .
 ```
 docker-compose -f docker-compose.yml up --detach
 ```
+
+## Dừng app
+
+```
+docker-compose down
+```
