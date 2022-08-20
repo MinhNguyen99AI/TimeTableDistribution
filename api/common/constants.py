@@ -1,3 +1,5 @@
+import os
+
 EXCEL_FILE_EXTENSIONS = ['xls', 'xlsx']
 NATIONALITY = {
     "native": ['Anh', 'Ai-len', 'Mỹ', 'Ai-Len', 'Nam Phi', 'Úc', 'Đan Mạch', 'Ailen', 'Ấn Độ', 'Hungari', 'Canada', 'Italy', 'Thuỵ Điển', 'Ý'],
@@ -14,8 +16,8 @@ SCHEDULE_STATUS = {
     "FINISHED": "FINISHED"
 }
 
-MONGODB_URI = "mongodb://localhost:27017/"
-MONGODB_DATABASE = "default"
+MONGODB_URL = os.environ['MONGODB_URL']
+MONGODB_DATABASE = "timetable"
 SCHEDULE_COLLECTION = "schoolSchedule"
 
 MONGODB_DOCUMENT_EXPIRE_TIME = 172800  # 2 days

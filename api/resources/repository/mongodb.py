@@ -1,7 +1,7 @@
 import pymongo
 from common.constants import *
 
-mongo_client = pymongo.MongoClient(MONGODB_URI)
+mongo_client = pymongo.MongoClient(MONGODB_URL)
 
 mongo_db = mongo_client[MONGODB_DATABASE]
 
