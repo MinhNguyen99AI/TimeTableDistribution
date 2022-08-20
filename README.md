@@ -1,5 +1,10 @@
 # Time table scheduling
 
+## Thông tin port
+
+- API: 5000
+- MongoDB: 27017
+
 ## Tạo API docker image (nếu chưa tồn tại)
 
 ```
