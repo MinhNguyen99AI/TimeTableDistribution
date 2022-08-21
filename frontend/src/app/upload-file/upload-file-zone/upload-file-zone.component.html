@@ -1,0 +1,96 @@
+<!-- Upload  -->
+<div class="body">
+    <form id="" class="file-upload-form uploader" >
+        <input id="file-school-upload" type="file" name="fileUpload" accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" onclick="this.value = null" (change)="onFileSchoolSelect($event)"/>
+
+        <label for="file-school-upload" id="file-drag" *ngIf="notUploadSchool">
+            <img id="file-image" src="#" alt="Preview" class="hidden">
+            <div id="start">
+            <i class="fa fa-download" aria-hidden="true"></i>
+            <div>Drag or drop <b>School</b> file</div>
+            <div id="notimage" class="hidden">Please select an image</div>
+            <div class="btn-container">
+                <span id="file-upload-btn" class="btn btn-primary">Select a file</span>
+            </div>
+            </div>
+            <div id="response" class="hidden">
+            <div id="messages"></div>
+            <progress class="progress" id="file-progress" value="0">
+                <span>0</span>%
+            </progress>
+            </div>
+        </label>
+        <label for="file-upload" class="file-uploaded-preview" *ngIf="!notUploadSchool" #uploaded>
+            <div class="excel">
+                <img class="excel-img" src="./assets/excel-uploaded.png" alt="">
+            </div>
+            <div class="file-name">{{fileSchoolName}}</div>
+            <div class="file-size">{{fileSchoolSize}} KB</div>
+            <div class="garbarge">
+                <img class ="garbarge-img" src="./assets/garbarge.png" alt="" (click)="garbargeBtnSchoolClick()">
+            </div>
+        </label>
+    </form>
+    <form id="" class="file-upload-form uploader" >
+        <input id="file-foreign-upload" type="file" name="fileUpload" accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" onclick="this.value = null" (change)="onFileForeignSelect($event)"/>
+
+        <label for="file-foreign-upload" id="file-drag" *ngIf="notUploadForeign">
+            <img id="file-image" src="#" alt="Preview" class="hidden">
+            <div id="start">
+            <i class="fa fa-download" aria-hidden="true"></i>
+            <div>Drag or drop <b>Foreign Teacher</b> file</div>
+            <div id="notimage" class="hidden">Please select an image</div>
+            <div class="btn-container">
+                <span id="file-upload-btn" class="btn btn-primary">Select a file</span>
+            </div>
+            </div>
+            <div id="response" class="hidden">
+            <div id="messages"></div>
+            <progress class="progress" id="file-progress" value="0">
+                <span>0</span>%
+            </progress>
+            </div>
+        </label>
+        <label for="file-upload" class="file-uploaded-preview" *ngIf="!notUploadForeign" #uploaded>
+            <div class="excel">
+                <img class="excel-img" src="./assets/excel-uploaded.png" alt="">
+            </div>
+            <div class="file-name">{{fileForeignName}}</div>
+            <div class="file-size">{{fileForeignSize}} KB</div>
+            <div class="garbarge">
+                <img class ="garbarge-img" src="./assets/garbarge.png" alt="" (click)="garbargeBtnForeignClick()">
+            </div>
+        </label>
+    </form>
+    <form id="" class="file-upload-form uploader" >
+        <input id="file-VN-upload" type="file" name="fileUpload" accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" onclick="this.value = null" (change)="onFileVNSelect($event)"/>
+
+        <label for="file-VN-upload" id="file-drag" *ngIf="notUploadVN">
+            <img id="file-image" src="#" alt="Preview" class="hidden">
+            <div id="start">
+            <i class="fa fa-download" aria-hidden="true"></i>   
+            <div>Drag or drop <b>VN Teacher</b> file</div>
+            <div id="notimage" class="hidden">Please select an image</div>
+            <div class="btn-container">
+                <span id="file-upload-btn" class="btn btn-primary">Select a file</span>
+            </div>
+            </div>
+            <div id="response" class="hidden">
+            <div id="messages"></div>
+            <progress class="progress" id="file-progress" value="0">
+                <span>0</span>%
+            </progress>
+            </div>
+        </label>
+        <label for="file-upload" class="file-uploaded-preview" *ngIf="!notUploadVN" #uploaded>
+            <div class="excel">
+                <img class="excel-img" src="./assets/excel-uploaded.png" alt="">
+            </div>
+            <div class="file-name">{{fileVNName}}</div>
+            <div class="file-size">{{fileVNSize}} KB</div>
+            <div class="garbarge">
+                <img class ="garbarge-img" src="./assets/garbarge.png" alt="" (click)="garbargeBtnVNClick()">
+            </div>
+        </label>
+    </form>
+</div>

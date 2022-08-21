@@ -1,0 +1,32 @@
+$theme:       #2C8E71;
+.header{
+    display: flex;
+    justify-content: space-between;
+    background: #FCFDFC;
+    box-shadow: 0px -4px 20px rgba(0, 0, 0, 0.25);
+    padding-right: 50px;
+    padding-left: 50px;
+    margin-bottom: 10vh;
+    .left-header{
+        font-family: "Mulish";
+        font-style: normal;
+        font-weight: 900;
+        font-size: 30px;
+        line-height: 50px;
+        text-transform: capitalize;
+        color: #24272C;
+    }
+    .right-header{
+        display: flex;
+        justify-content: end;
+        font-family: "Mulish";
+        font-style: normal;
+        font-size: 25px;
+        line-height: 50px;
+        vertical-align: middle;
+        align-items: center;
+        p{
+            margin: 0px 10px 0px 10px;
+        }
+    }
+}
