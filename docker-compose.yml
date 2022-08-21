@@ -23,7 +23,16 @@ services:
       - timetable-mongo-volume-config:/etc/mongodb
     networks:
       - timetable-network
-
+  timetable-front-end-container:
+    image: timetable-angular-front-end:1.0.0
+    container_name: timetable-front-end-container
+    ports:
+      - 4200:80
+    volumes:
+      - ./app:/usr/local/app
+      - /usr/local/app/node_modules
+    networks:
+      - timetable-network
 networks:
   timetable-network:
     name: timetable-network

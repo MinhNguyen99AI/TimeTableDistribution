@@ -14,7 +14,8 @@ docker build --tag timetable-flask-api:1.0.0 .
 
 ## Tạo Frontend docker image
 
-#TODO
+cd front-end
+docker build --tag timetable-angular-front-end:1.0.0 .
 
 ## Chạy app
 
