@@ -14,12 +14,13 @@ docker build --tag timetable-flask-api:1.0.0 .
 
 ## Tạo Frontend docker image
 
-cd front-end
+cd frontend
 docker build --tag timetable-angular-front-end:1.0.0 .
 
 ## Chạy app
 
 ```
+cd..
 docker-compose -f docker-compose.yml up --detach
 ```
 
