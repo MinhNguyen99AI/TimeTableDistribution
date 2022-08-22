@@ -1,0 +1,16 @@
+<app-header></app-header>
+
+<div class="body">
+    <div class="merge-file-img">
+        <img src="./assets/merge-file.png" alt="">
+        <p class="merge-file-img-title">MERGE FILES</p>
+    </div>
+    <div class="upload-file">
+        <app-upload-file-zone (fileUploaded)="uploadFile($event)"></app-upload-file-zone>
+    </div>
+    <div class="merge-btn">
+        <button class="btn merge-file-btn" (click)="onMergeClick()">Merge</button>
+    </div>
+</div>
+
+<app-footer></app-footer>
