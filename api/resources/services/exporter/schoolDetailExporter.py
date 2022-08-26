@@ -1,11 +1,13 @@
 import pandas as pd
-from common.util import getClassName
+from common.util import getClassName, getTeacherName
+from common.constants import *
 
 
 class SchoolDetailExporter:
     def __init__(self, df, name):
         self.df = df.copy(deep=True)
         self.name = name
+        self.styles = {}
         self.preprocess_df()
 
     def preprocess_df(self):
@@ -48,45 +50,48 @@ class SchoolDetailExporter:
                 int(row["Thu"]))][row["Buổi"]]
 
             current_classes = current_session.get(
-                row["Ten Giao Vien Duoc Xep"], [None, None, None, None])
-            current_classes[row["Tiet trong buoi"] - 1] = row["Lớp"]
+                str(row["Tiet trong buoi"]), [])
 
-            current_session[row["Ten Giao Vien Duoc Xep"]] = current_classes
+            gvnn = getTeacherName(row["Ten Giao Vien Nuoc Ngoai"])
+            gvvn = getTeacherName(row["Ten Giao Vien Viet Nam"])
+            ta = getTeacherName(row["Ten Giao Vien Tro Giang"])
+
+            if gvnn:
+                ta = gvvn
+                gvvn = None
+
+            current_classes.append({
+                "class": row["Lớp"],
+                "GVNN": gvnn,
+                "GVVN": gvvn,
+                "TA": ta
+            })
+
+            current_session[str(row["Tiet trong buoi"])] = current_classes
 
         return school_schedule
 
     def add_headers(self, worksheet):
-        worksheet.write(2, 0, "SÁNG", self.header_style)
-        worksheet.merge_range(2, 0, 5, 0, None)
-        worksheet.write(7, 0, "CHIỀU", self.header_style)
-        worksheet.merge_range(7, 0, 10, 0, None)
-        worksheet.write(1, 1, "Giáo viên", self.header_style)
-        worksheet.write(6, 1, "Giáo viên", self.header_style)
+        worksheet.write('A1', "Buổi", self.styles["header"])
+        worksheet.merge_range('A1:A2', None)
+        worksheet.write('B1', "Tiết", self.styles["header"])
+        worksheet.merge_range('B1:B2', None)
 
-        worksheet.write(0, 0, "Buổi", self.header_style)
-        worksheet.write(0, 1, "Tiết", self.header_style)
+        worksheet.write('A3', "SÁNG", self.styles["header"])
+        worksheet.merge_range('A3:A6', None)
+        worksheet.write('A7', "CHIỀU", self.styles["header"])
+        worksheet.merge_range('A7:A10', None)
 
         for i in range(1, 5):
-            worksheet.write(1 + i, 1, i, self.header_style)
-            worksheet.write(6 + i, 1, i, self.header_style)
+            worksheet.write(1 + i, 1, i, self.styles["header"])
+            worksheet.write(5 + i, 1, i, self.styles["header"])
 
     def process(self, buffer):
         writer = pd.ExcelWriter(buffer, engine='xlsxwriter')
 
         workbook = writer.book
 
-        self.header_style = workbook.add_format(
-            {
-                'bold': True,
-                'border': True,
-                'align': 'center'
-            })
-
-        self.cell_style = workbook.add_format(
-            {
-                'border': True,
-                'align': 'center'
-            })
+        self.setCellsFormat(workbook)
 
         for school in self.df["Ten Truong"].unique().tolist():
             schedule = self.getSchoolSchedule(school)
@@ -97,9 +102,10 @@ class SchoolDetailExporter:
             current_col = 2
             for day in ['2', '3', '4', '5', '6']:
                 self.worksheet.write(
-                    0, current_col, "Thứ {}".format(day), self.header_style)
-                col_width = max(1, len(schedule[day]["Sáng"]), len(
-                    schedule[day]["Chiều"]))
+                    0, current_col, "Thứ {}".format(day), self.styles["header"])
+
+                col_width = max(1, self.findMaxConcurrentClassNum(schedule[day]["Sáng"]),
+                                self.findMaxConcurrentClassNum(schedule[day]["Chiều"]))*4
                 # Set Column size
                 self.worksheet.set_column(
                     current_col, current_col + col_width - 1, 20)
@@ -115,20 +121,68 @@ class SchoolDetailExporter:
 
         writer.save()
 
+    def findMaxConcurrentClassNum(self, period_data):
+        result = 0
+        for _, v in period_data.items():
+            result = max(result, len(v))
+        return result
+
     def writeSchedule(self, schedule, session, day, current_col, col_width):
         if session == "Sáng":
-            header_row = 1
+            start_row = 1
         else:
-            header_row = 6
-
-        for idx, (teacher, classes) in enumerate(schedule[day][session].items()):
-            self.worksheet.write(header_row, current_col + idx,
-                                 teacher, self.header_style)
-            for period, cls in enumerate(classes):
-                self.worksheet.write(
-                    header_row + 1 + period, current_col + idx, cls, self.cell_style)
+            start_row = 5
 
         for col in range(current_col + len(schedule[day][session]), current_col + col_width):
-            self.worksheet.write_blank(header_row, col, '', self.header_style)
-            for i in range(header_row + 1, header_row + 5):
-                self.worksheet.write_blank(i, col, '', self.cell_style)
+            self.worksheet.write_blank(
+                start_row, col, '', self.styles["header"])
+            for i in range(start_row + 1, start_row + 5):
+                self.worksheet.write_blank(i, col, '', self.styles["cell"])
+
+        if session == "Sáng":
+            for col in range(col_width//4):
+                self.worksheet.write(1, current_col + col*4,
+                                     "Lớp", self.styles["header"])
+                self.worksheet.write(
+                    1, current_col + col*4 + 1, "GV Nước ngoài", self.styles["header"])
+                self.worksheet.write(
+                    1, current_col + col*4 + 2, "GV Việt Nam", self.styles["header"])
+                self.worksheet.write(
+                    1, current_col + col*4 + 3, "Trợ giảng", self.styles["header"])
+
+        for k, period_data in schedule[day][session].items():
+            period = int(k)
+            for idx, cls in enumerate(period_data):
+                self.worksheet.write(
+                    start_row + period, current_col + idx*4, cls['class'], self.styles["cell_" + str(idx % 2)])
+                self.worksheet.write(
+                    start_row + period, current_col + idx*4 + 1, cls['GVNN'], self.styles["cell_" + str(idx % 2)])
+                self.worksheet.write(
+                    start_row + period, current_col + idx*4 + 2, cls['GVVN'], self.styles["cell_" + str(idx % 2)])
+                self.worksheet.write(
+                    start_row + period, current_col + idx*4 + 3, cls['TA'], self.styles["cell_" + str(idx % 2)])
+
+    def setCellsFormat(self, workbook):
+        self.styles["header"] = workbook.add_format(
+            {
+                'bold': True,
+                'border': True,
+                'align': 'center'
+            })
+        self.styles["cell"] = workbook.add_format(
+            {
+                'border': True,
+                'align': 'center'
+            })
+        self.styles["cell_0"] = workbook.add_format(
+            {
+                'border': True,
+                'align': 'center',
+                'bg_color': 'B1D7B4'
+            })
+        self.styles["cell_1"] = workbook.add_format(
+            {
+                'border': True,
+                'align': 'center',
+                'bg_color': 'E6D2AA'
+            })

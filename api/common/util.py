@@ -4,6 +4,7 @@ import pandas as pd
 import base64
 from zipfile import ZipFile
 import io
+from common.constants import *
 
 
 def readDataframeFrombase64(data: str, sheetName: str = None) -> pd.DataFrame:
@@ -53,6 +54,7 @@ def getDayFromNum(dayNum):
         return "Saturday"
     return "Sunday"
 
+
 def getClassName(row):
     class_type = 'DT'
     if row["Chuong Trinh"] == "1 Chat Luong Cao":
@@ -63,3 +65,9 @@ def getClassName(row):
         class_type = 'T'
 
     return "{}{}{}".format(int(row['Khoi']), class_type, int(row['Lop so']))
+
+
+def getTeacherName(name):
+    if name != NO_TEACHER_NAME:
+        return name
+    return None

@@ -24,8 +24,8 @@ def job(df_truong, df_GVNN, df_GVVN, id):
 
     df_all_result = pd.read_excel("D:/[RESULTS] GVVN.xlsx")
 
-    # school_detail = SchoolDetailExporter(
-    #     df_all_result, "TKB chi tiết trường.xlsx")
+    school_detail = SchoolDetailExporter(
+        df_all_result, "TKB chi tiết trường.xlsx")
 
     gvnn_detail = TeacherDetailExporter(
         df_all_result, "TKB GVNN - chi tiết.xlsx", TYPE_GVNN)
@@ -37,11 +37,8 @@ def job(df_truong, df_GVNN, df_GVVN, id):
     gvvn_master = TeacherMasterExporter(
         df_all_result, "TKB GVVN - tổng.xlsx", TYPE_GVVN)
 
-    # result_bytes = zipExporters(
-    #     [school_detail, gvnn_detail, gvnn_master, gvvn_detail, gvvn_master])
-
     result_bytes = zipExporters(
-        [gvnn_detail, gvnn_master, gvvn_detail, gvvn_master])
+        [school_detail, gvnn_detail, gvnn_master, gvvn_detail, gvvn_master])
 
     schedule_collection.find_one_and_update({"_id": ObjectId(
         id)}, {'$set': {"status": SCHEDULE_STATUS["FINISHED"], "data": result_bytes}})
