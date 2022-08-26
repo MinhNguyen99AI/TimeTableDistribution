@@ -122,7 +122,7 @@ class TeacherDetailExporter:
 
     def writeDayRow(self, worksheet, row, col, day):
         worksheet.write(row, col, day, self.header_style)
-        worksheet.merge_range(row, col, row, col + 2, None)
+        worksheet.merge_range(row, col, row, col + 4, None)
 
         worksheet.write(row + 1, col, "Start time", self.header_style)
         worksheet.write(row + 1, col + 1, "Class", self.header_style)
@@ -131,30 +131,32 @@ class TeacherDetailExporter:
         worksheet.write(row + 1, col + 4, "Tel", self.header_style)
 
     def add_headers(self, worksheet):
-        worksheet.write('A3', "Sessions", self.header_style)
-        worksheet.write('B3', "Periods", self.header_style)
-        worksheet.write('A4', "Morning", self.header_style)
-        worksheet.merge_range('A4:A7', None)
+        worksheet.write('A1', "Sessions", self.header_style)
+        worksheet.merge_range('A1:A2', None)
+        worksheet.write('B1', "Periods", self.header_style)
+        worksheet.merge_range('B1:B2', None)
+        worksheet.write('A3', "School", self.header_style)
+        worksheet.merge_range('A3:B3', None)
+        worksheet.write('A4', "Address", self.header_style)
+        worksheet.merge_range('A4:B4', None)
+
+        worksheet.write('A5', "Morning", self.header_style)
+        worksheet.merge_range('A5:A9', None)
+        for i in range(1, 6):
+            worksheet.write(i+3, 1, i, self.header_style)
+
+        worksheet.write('A10', "School", self.header_style)
+        worksheet.merge_range('A10:B10', None)
+        worksheet.write('A11', "Address", self.header_style)
+        worksheet.merge_range('A11:B11', None)
+
+        worksheet.write('A12', "Afternoon", self.header_style)
+        worksheet.merge_range('A12:A15', None)
         for i in range(1, 5):
-            worksheet.write(i+2, 1, i, self.header_style)
+            worksheet.write(i+10, 1, i, self.header_style)
 
-        worksheet.write('A8', "School", self.header_style)
-        worksheet.merge_range('A8:B8', None)
-
-        worksheet.write('A9', "Sessions", self.header_style)
-        worksheet.write('B9', "Periods", self.header_style)
-        worksheet.write('A10', "Afternoon", self.header_style)
-        worksheet.merge_range('A10:A13', None)
-        for i in range(1, 5):
-            worksheet.write(i+8, 1, i, self.header_style)
-
-        worksheet.write('A14', "School", self.header_style)
-        worksheet.merge_range('A14:B14', None)
-
-        worksheet.write('A15', "Total periods", self.header_style)
-        worksheet.merge_range('A15:B15', None)
-
-        worksheet.merge_range('C3:Q3', None)
+        worksheet.write('A16', "Total periods", self.header_style)
+        worksheet.merge_range('A16:B16', None)
 
         worksheet.set_column(0, 0, 10)
         worksheet.set_column(1, 1, 10)
@@ -187,8 +189,8 @@ class TeacherDetailExporter:
                 worksheet.set_column(current_col, current_col, 10)
                 worksheet.set_column(current_col + 1, current_col + 1, 5)
                 worksheet.set_column(current_col + 2, current_col + 2, 12)
-                worksheet.set_column(current_col + 2, current_col + 3, 20)
-                worksheet.set_column(current_col + 2, current_col + 4, 12)
+                worksheet.set_column(current_col + 3, current_col + 3, 25)
+                worksheet.set_column(current_col + 4, current_col + 4, 15)
 
     def writeToFileTeacherDetail(self, buffer, dfs):
         writer = pd.ExcelWriter(buffer, engine='xlsxwriter')
@@ -210,29 +212,33 @@ class TeacherDetailExporter:
         for sheetname, (df_morning, df_afternoon, metadata) in dfs.items():
             worksheet = workbook.add_worksheet(sheetname)
 
-            for r in range(15):
+            for r in range(16):
                 for c in range(27):
                     worksheet.write_blank(r, c, '', self.cell_style)
 
             self.add_headers(worksheet)
 
-            self.writeSessionData(worksheet, df_morning, 2)
-            self.writeSessionData(worksheet, df_afternoon, 9)
+            self.writeSessionData(worksheet, df_morning, 3)
+            self.writeSessionData(worksheet, df_afternoon, 10)
 
-            self.addSchoolName(metadata['School Morning'], worksheet, 7)
-            self.addSchoolName(metadata['School Afternoon'], worksheet, 13)
+            self.addSchoolName(metadata['School Morning'], worksheet, 2)
+            self.addSchoolName(metadata['School Afternoon'], worksheet, 9)
 
             self.writePeriodCount(metadata["Periods Count"],
-                                  worksheet, 14)
+                                  worksheet, 15)
 
         writer.save()
 
     def addSchoolName(self, schools, worksheet, startrow):
         for idx, data in enumerate(schools):
             column_idx = 2 + idx * 5
+            # School data
             worksheet.write(startrow, column_idx, data, self.header_style)
             worksheet.merge_range(startrow, column_idx,
                                   startrow, column_idx + 4, None)
+            # School address data
+            worksheet.merge_range(startrow + 1, column_idx,
+                                  startrow + 1, column_idx + 4, None)
 
     def writePeriodCount(self, periods, worksheet, startrow):
         for idx, data in enumerate(periods):

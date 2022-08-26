@@ -28,12 +28,12 @@ def job(df_truong, df_GVNN, df_GVVN, id):
     #     df_all_result, "TKB chi tiết trường.xlsx")
 
     gvnn_detail = TeacherDetailExporter(
-        df_all_result, "TKB GVNN - chi tiết.xlsx", TYPE_GVVN)
+        df_all_result, "TKB GVNN - chi tiết.xlsx", TYPE_GVNN)
     # gvnn_master = TeacherMasterExporter(
     #     gvnn_result, "TKB GVNN - tổng.xlsx")
 
-    # gvvn_detail = TeacherDetailExporter(
-    #     gvvn_result, "TKB GVVN - chi tiết.xlsx")
+    gvvn_detail = TeacherDetailExporter(
+        df_all_result, "TKB GVVN - chi tiết.xlsx", TYPE_GVVN)
     # gvvn_master = TeacherMasterExporter(
     #     gvvn_result, "TKB GVVN - tổng.xlsx")
 
