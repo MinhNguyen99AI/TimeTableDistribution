@@ -29,19 +29,19 @@ def job(df_truong, df_GVNN, df_GVVN, id):
 
     gvnn_detail = TeacherDetailExporter(
         df_all_result, "TKB GVNN - chi tiết.xlsx", TYPE_GVNN)
-    # gvnn_master = TeacherMasterExporter(
-    #     gvnn_result, "TKB GVNN - tổng.xlsx")
+    gvnn_master = TeacherMasterExporter(
+        df_all_result, "TKB GVNN - tổng.xlsx", TYPE_GVNN)
 
     gvvn_detail = TeacherDetailExporter(
         df_all_result, "TKB GVVN - chi tiết.xlsx", TYPE_GVVN)
-    # gvvn_master = TeacherMasterExporter(
-    #     gvvn_result, "TKB GVVN - tổng.xlsx")
+    gvvn_master = TeacherMasterExporter(
+        df_all_result, "TKB GVVN - tổng.xlsx", TYPE_GVVN)
 
     # result_bytes = zipExporters(
     #     [school_detail, gvnn_detail, gvnn_master, gvvn_detail, gvvn_master])
 
     result_bytes = zipExporters(
-        [gvnn_detail, gvvn_detail])
+        [gvnn_detail, gvnn_master, gvvn_detail, gvvn_master])
 
     schedule_collection.find_one_and_update({"_id": ObjectId(
         id)}, {'$set': {"status": SCHEDULE_STATUS["FINISHED"], "data": result_bytes}})

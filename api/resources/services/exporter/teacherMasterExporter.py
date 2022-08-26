@@ -1,18 +1,19 @@
 import pandas as pd
-from common.util import isOneVal
+from common.util import getClassName
+from common.constants import *
 
 
 class TeacherMasterExporter:
-    def __init__(self, df, name):
+    def __init__(self, df, name, type):
         self.df = df.copy(deep=True)
         self.name = name
+        self.type = type
         self.preprocess_df()
 
     def preprocess_df(self):
         self.df['Buổi'] = self.df.apply(
             lambda row: "Sáng" if row['Tiet_Trong_Ngay'] < 5 else "Chiều", axis=1)
-        self.df['Lớp'] = self.df.apply(lambda row: str(
-            int(row['Khoi'])) + 'A' + str(int(row['Lop so'])), axis=1)
+        self.df['Lớp'] = self.df.apply(getClassName, axis=1)
 
     def getName(self):
         return self.name
@@ -20,18 +21,31 @@ class TeacherMasterExporter:
     def process(self, buffer):
         gv_master_dict = []
 
-        for name in self.df["Ten Giao Vien Duoc Xep"].unique():
-            if name == "THIEU GIAO VIEN":
+        if self.type == TYPE_GVNN:
+            # GVNN
+            teachers = self.df["Ten Giao Vien Nuoc Ngoai"].unique()
+        else:
+            # GVVN
+            teachers = pd.unique(self.df[['Ten Giao Vien Viet Nam',
+                                          'Ten Giao Vien Tro Giang']].values.ravel('K'))
+
+        for teacher in teachers:
+            if teacher == LACK_TEACHER_NAME or teacher == NO_TEACHER_NAME:
                 continue
             sessions = []
 
             for session in ["Sáng", "Chiều"]:
-                d = {"Tên": name, "Buổi": session}
+                d = {"Tên": teacher, "Buổi": session}
                 class_per_session = 0
 
                 for day in range(2, 6 + 1):
-                    sub_df = self.df[(self.df["Ten Giao Vien Duoc Xep"] == name) & (
-                        self.df["Buổi"] == session) & (self.df["Thu"] == day)]
+
+                    if self.type == TYPE_GVNN:
+                        sub_df = self.df[(self.df["Ten Giao Vien Nuoc Ngoai"] == teacher) & (
+                            self.df["Buổi"] == session) & (self.df["Thu"] == day)]
+                    else:
+                        sub_df = self.df[((self.df["Ten Giao Vien Viet Nam"] == teacher) | (self.df["Ten Giao Vien Tro Giang"] == teacher)) & (
+                            self.df["Buổi"] == session) & (self.df["Thu"] == day)]
 
                     class_per_session += len(sub_df)
                     clazz = ""
