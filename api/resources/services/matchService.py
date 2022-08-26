@@ -41,7 +41,7 @@ def job(df_truong, df_GVNN, df_GVVN, id):
     #     [school_detail, gvnn_detail, gvnn_master, gvvn_detail, gvvn_master])
 
     result_bytes = zipExporters(
-        [gvnn_detail])
+        [gvnn_detail, gvvn_detail])
 
     schedule_collection.find_one_and_update({"_id": ObjectId(
         id)}, {'$set': {"status": SCHEDULE_STATUS["FINISHED"], "data": result_bytes}})

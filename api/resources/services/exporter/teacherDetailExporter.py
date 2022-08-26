@@ -10,6 +10,7 @@ class TeacherDetailExporter:
         self.name = name
         self.vi_session = {"Morning": "Sáng", "Afternoon": "Chiều"}
         self.type = type
+        self.styles = {}
 
         self.preprocess_df()
 
@@ -121,41 +122,42 @@ class TeacherDetailExporter:
         return gv_detail_dict
 
     def writeDayRow(self, worksheet, row, col, day):
-        worksheet.write(row, col, day, self.header_style)
+        worksheet.write(row, col, day, self.styles["top_header"])
         worksheet.merge_range(row, col, row, col + 4, None)
 
-        worksheet.write(row + 1, col, "Start time", self.header_style)
-        worksheet.write(row + 1, col + 1, "Class", self.header_style)
-        worksheet.write(row + 1, col + 2, "Document", self.header_style)
-        worksheet.write(row + 1, col + 3, "TA", self.header_style)
-        worksheet.write(row + 1, col + 4, "Tel", self.header_style)
+        worksheet.write(row + 1, col, "Start time", self.styles["top_header"])
+        worksheet.write(row + 1, col + 1, "Class", self.styles["top_header"])
+        worksheet.write(row + 1, col + 2, "Document",
+                        self.styles["top_header"])
+        worksheet.write(row + 1, col + 3, "TA", self.styles["top_header"])
+        worksheet.write(row + 1, col + 4, "Tel", self.styles["top_header"])
 
     def add_headers(self, worksheet):
-        worksheet.write('A1', "Sessions", self.header_style)
+        worksheet.write('A1', "Sessions", self.styles["top_header"])
         worksheet.merge_range('A1:A2', None)
-        worksheet.write('B1', "Periods", self.header_style)
+        worksheet.write('B1', "Periods", self.styles["top_header"])
         worksheet.merge_range('B1:B2', None)
-        worksheet.write('A3', "School", self.header_style)
+        worksheet.write('A3', "School", self.styles["header"])
         worksheet.merge_range('A3:B3', None)
-        worksheet.write('A4', "Address", self.header_style)
+        worksheet.write('A4', "Address", self.styles["header"])
         worksheet.merge_range('A4:B4', None)
 
-        worksheet.write('A5', "Morning", self.header_style)
+        worksheet.write('A5', "Morning", self.styles["header"])
         worksheet.merge_range('A5:A9', None)
         for i in range(1, 6):
-            worksheet.write(i+3, 1, i, self.header_style)
+            worksheet.write(i+3, 1, i, self.styles["header"])
 
-        worksheet.write('A10', "School", self.header_style)
+        worksheet.write('A10', "School", self.styles["header"])
         worksheet.merge_range('A10:B10', None)
-        worksheet.write('A11', "Address", self.header_style)
+        worksheet.write('A11', "Address", self.styles["header"])
         worksheet.merge_range('A11:B11', None)
 
-        worksheet.write('A12', "Afternoon", self.header_style)
+        worksheet.write('A12', "Afternoon", self.styles["header"])
         worksheet.merge_range('A12:A15', None)
         for i in range(1, 5):
-            worksheet.write(i+10, 1, i, self.header_style)
+            worksheet.write(i+10, 1, i, self.styles["header"])
 
-        worksheet.write('A16', "Total periods", self.header_style)
+        worksheet.write('A16', "Total periods", self.styles["periods"])
         worksheet.merge_range('A16:B16', None)
 
         worksheet.set_column(0, 0, 10)
@@ -175,16 +177,21 @@ class TeacherDetailExporter:
                 current_row = start_row + row["Periods"]
                 current_col = 2 + idx * 5
 
+                if info["Is TA"]:
+                    class_style = self.styles["ta_class"]
+                else:
+                    class_style = self.styles["main_class"]
+
                 worksheet.write(current_row, current_col,
-                                info["Start time"], self.cell_style)
+                                info["Start time"], self.styles["cell"])
                 worksheet.write(current_row, current_col + 1,
-                                info["Class"], self.cell_style)
+                                info["Class"], class_style)
                 worksheet.write(current_row, current_col + 2,
-                                info["Document"], self.cell_style)
+                                info["Document"], self.styles["cell"])
                 worksheet.write(current_row, current_col + 3,
-                                info["TA"], self.cell_style)
+                                info["TA"], self.styles["cell"])
                 worksheet.write(current_row, current_col + 4,
-                                info["TA Tel"], self.cell_style)
+                                info["TA Tel"], self.styles["cell"])
 
                 worksheet.set_column(current_col, current_col, 10)
                 worksheet.set_column(current_col + 1, current_col + 1, 5)
@@ -195,26 +202,14 @@ class TeacherDetailExporter:
     def writeToFileTeacherDetail(self, buffer, dfs):
         writer = pd.ExcelWriter(buffer, engine='xlsxwriter')
         workbook = writer.book
-
-        self.header_style = workbook.add_format(
-            {
-                'bold': True,
-                'border': True,
-                'align': 'center'
-            })
-
-        self.cell_style = workbook.add_format(
-            {
-                'border': True,
-                'align': 'center'
-            })
+        self.setCellsFormat(workbook)
 
         for sheetname, (df_morning, df_afternoon, metadata) in dfs.items():
             worksheet = workbook.add_worksheet(sheetname)
 
             for r in range(16):
                 for c in range(27):
-                    worksheet.write_blank(r, c, '', self.cell_style)
+                    worksheet.write_blank(r, c, '', self.styles["cell"])
 
             self.add_headers(worksheet)
 
@@ -226,6 +221,11 @@ class TeacherDetailExporter:
 
             self.writePeriodCount(metadata["Periods Count"],
                                   worksheet, 15)
+            worksheet.write('A18', "Note:", None)
+            worksheet.write('B18', "Class in Red: Main Teacher class",
+                            self.styles["main_class_note"])
+            worksheet.write('B19', "Class in Black: TA class",
+                            self.styles["ta_class_note"])
 
         writer.save()
 
@@ -233,7 +233,7 @@ class TeacherDetailExporter:
         for idx, data in enumerate(schools):
             column_idx = 2 + idx * 5
             # School data
-            worksheet.write(startrow, column_idx, data, self.header_style)
+            worksheet.write(startrow, column_idx, data, self.styles["school"])
             worksheet.merge_range(startrow, column_idx,
                                   startrow, column_idx + 4, None)
             # School address data
@@ -243,12 +243,12 @@ class TeacherDetailExporter:
     def writePeriodCount(self, periods, worksheet, startrow):
         for idx, data in enumerate(periods):
             column_idx = 2 + idx * 5
-            worksheet.write(startrow, column_idx, data, self.header_style)
+            worksheet.write(startrow, column_idx, data, self.styles["periods"])
             worksheet.merge_range(startrow, column_idx,
                                   startrow, column_idx + 4, None)
 
         worksheet.write(startrow, len(periods)*5 + 2,
-                        sum(periods), self.header_style)
+                        sum(periods), self.styles["periods"])
 
     def countClassInSession(self, d):
         df = pd.json_normalize(d)
@@ -261,3 +261,59 @@ class TeacherDetailExporter:
                 df[getDayFromNum(day)]["Class"].notnull().sum())
 
         return classCountByDay
+
+    def setCellsFormat(self, workbook):
+        self.styles["top_header"] = workbook.add_format(
+            {
+                'bold': True,
+                'border': True,
+                'align': 'center',
+                'bg_color': 'B1D7B4'
+            })
+        self.styles["header"] = workbook.add_format(
+            {
+                'bold': True,
+                'border': True,
+                'align': 'center'
+            })
+
+        self.styles["cell"] = workbook.add_format(
+            {
+                'border': True,
+                'align': 'center'
+            })
+        self.styles["main_class"] = workbook.add_format(
+            {
+                'border': True,
+                'font_color': 'FF0000',
+                'align': 'center',
+
+            })
+        self.styles["ta_class"] = workbook.add_format(
+            {
+                'border': True,
+                'align': 'center'
+            })
+        self.styles["school"] = workbook.add_format(
+            {
+                'border': True,
+                'bold': True,
+                'align': 'center',
+                'font_color': 'FF0000',
+                'bg_color': 'F7F5F2'
+            })
+
+        self.styles["periods"] = workbook.add_format(
+            {
+                'border': True,
+                'bold': True,
+                'align': 'center',
+                'bg_color': 'FFD8A9'
+            })
+        self.styles["main_class_note"] = workbook.add_format(
+            {
+                'font_color': 'FF0000',
+            })
+        self.styles["ta_class_note"] = workbook.add_format(
+            {
+            })
