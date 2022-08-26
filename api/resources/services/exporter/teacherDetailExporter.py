@@ -1,13 +1,15 @@
 import pandas as pd
 from operator import add
 from common.util import getDayFromNum, getClassName
+from common.constants import *
 
 
 class TeacherDetailExporter:
-    def __init__(self, df, name):
+    def __init__(self, df, name, type):
         self.df = df.copy(deep=True)
         self.name = name
         self.vi_session = {"Morning": "Sáng", "Afternoon": "Chiều"}
+        self.type = type
 
         self.preprocess_df()
 
@@ -25,9 +27,16 @@ class TeacherDetailExporter:
 
     def process(self, buffer):
         dfs = {}
+        if self.type == TYPE_GVNN:
+            # GVNN
+            teachers = self.df["Ten Giao Vien Nuoc Ngoai"].unique()
+        else:
+            # GVVN
+            teachers = pd.unique(self.df[['Ten Giao Vien Viet Nam',
+                                          'Ten Giao Vien Tro Giang']].values.ravel('K'))
 
-        for teacher in self.df["Ten Giao Vien Duoc Xep"].unique():
-            if teacher == "THIEU GIAO VIEN":
+        for teacher in teachers:
+            if teacher == LACK_TEACHER_NAME or teacher == NO_TEACHER_NAME:
                 continue
 
             metadata = {"Periods Count": [0, 0, 0, 0, 0]}
@@ -45,8 +54,12 @@ class TeacherDetailExporter:
         self.writeToFileTeacherDetail(buffer, dfs)
 
     def getTeacherSchool(self, teacher, session):
-        sub_df = self.df[(self.df["Ten Giao Vien Duoc Xep"] == teacher) & (
-            self.df["Buổi"] == self.vi_session[session])].groupby("Thu").first()["Ten Truong"]
+        if self.type == TYPE_GVNN:
+            sub_df = self.df[(self.df["Ten Giao Vien Nuoc Ngoai"] == teacher) & (
+                self.df["Buổi"] == self.vi_session[session])].groupby("Thu").first()["Ten Truong"]
+        else:
+            sub_df = self.df[((self.df["Ten Giao Vien Viet Nam"] == teacher) | (self.df["Ten Giao Vien Tro Giang"] == teacher)) & (
+                self.df["Buổi"] == self.vi_session[session])].groupby("Thu").first()["Ten Truong"]
         school = [None] * 5
         for day, row in zip(sub_df.index.tolist(), sub_df):
             school[int(day) - 2] = row
@@ -62,20 +75,48 @@ class TeacherDetailExporter:
             d[getDayFromNum(day)] = {
                 "Start time": None,
                 "Class": None,
-                "Document": None
+                "Document": None,
+                "Is TA": None,
+                "TA": None,
+                "TA Tel": None
             }
         return d
+
+    def getTANameAndStatus(self, teacher, row):
+        is_TA = False
+        TA = None
+        if self.type == TYPE_GVNN:
+            if row["Ten Giao Vien Viet Nam"] != NO_TEACHER_NAME:
+                TA = row["Ten Giao Vien Viet Nam"]
+        else:
+            # GVVN
+            if row["Ten Giao Vien Viet Nam"] == teacher:
+                if row["Ten Giao Vien Nuoc Ngoai"] == NO_TEACHER_NAME:
+                    is_TA = False
+                    if row["Ten Giao Vien Tro Giang"] != NO_TEACHER_NAME:
+                        TA = row["Ten Giao Vien Tro Giang"]
+                else:
+                    is_TA = True
+            else:
+                is_TA = True
+
+        return is_TA, TA
 
     def getTeacherDetailRowsbySession(self, teacher, session):
         gv_detail_dict = []
         for period in range(1, 4 + 1):
             d = self.initTeacherDetailRowDict(session, period)
-            sub_df = self.df[(self.df["Ten Giao Vien Duoc Xep"] == teacher) & (
-                self.df["Buổi"] == self.vi_session[session]) & (self.df["Tiet trong buoi"] == period)]
+            if self.type == TYPE_GVNN:
+                sub_df = self.df[(self.df["Ten Giao Vien Nuoc Ngoai"] == teacher) & (
+                    self.df["Buổi"] == self.vi_session[session]) & (self.df["Tiet trong buoi"] == period)]
+            else:
+                sub_df = self.df[((self.df["Ten Giao Vien Viet Nam"] == teacher) | (self.df["Ten Giao Vien Tro Giang"] == teacher)) & (
+                    self.df["Buổi"] == self.vi_session[session]) & (self.df["Tiet trong buoi"] == period)]
 
             for _, row in sub_df.iterrows():
-                d[getDayFromNum(row['Thu'])] = {
-                    "Start time": None, 'Class': row['Lớp'], 'Document': row['Document']}
+                is_TA, TA = self.getTANameAndStatus(teacher, row)
+                d[getDayFromNum(row['Thu'])] = {"Start time": None, 'Class': row['Lớp'],
+                                                'Document': row['Document'], "Is TA": is_TA, 'TA': TA, 'TA Tel': None}
             gv_detail_dict.append(d)
         return gv_detail_dict
 
@@ -86,6 +127,8 @@ class TeacherDetailExporter:
         worksheet.write(row + 1, col, "Start time", self.header_style)
         worksheet.write(row + 1, col + 1, "Class", self.header_style)
         worksheet.write(row + 1, col + 2, "Document", self.header_style)
+        worksheet.write(row + 1, col + 3, "TA", self.header_style)
+        worksheet.write(row + 1, col + 4, "Tel", self.header_style)
 
     def add_headers(self, worksheet):
         worksheet.write('A3', "Sessions", self.header_style)
@@ -118,17 +161,17 @@ class TeacherDetailExporter:
 
         # Day headers
         self.writeDayRow(worksheet, 0, 2, "Monday")
-        self.writeDayRow(worksheet, 0, 5, "Tuesday")
-        self.writeDayRow(worksheet, 0, 8, "Wednesday")
-        self.writeDayRow(worksheet, 0, 11, "Thursday")
-        self.writeDayRow(worksheet, 0, 14, "Friday")
+        self.writeDayRow(worksheet, 0, 7, "Tuesday")
+        self.writeDayRow(worksheet, 0, 12, "Wednesday")
+        self.writeDayRow(worksheet, 0, 17, "Thursday")
+        self.writeDayRow(worksheet, 0, 22, "Friday")
 
     def writeSessionData(self, worksheet, df, start_row):
         for row in df:
             for idx, day in enumerate(["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]):
                 info = row[day]
                 current_row = start_row + row["Periods"]
-                current_col = 2 + idx * 3
+                current_col = 2 + idx * 5
 
                 worksheet.write(current_row, current_col,
                                 info["Start time"], self.cell_style)
@@ -136,10 +179,16 @@ class TeacherDetailExporter:
                                 info["Class"], self.cell_style)
                 worksheet.write(current_row, current_col + 2,
                                 info["Document"], self.cell_style)
+                worksheet.write(current_row, current_col + 3,
+                                info["TA"], self.cell_style)
+                worksheet.write(current_row, current_col + 4,
+                                info["TA Tel"], self.cell_style)
 
                 worksheet.set_column(current_col, current_col, 10)
                 worksheet.set_column(current_col + 1, current_col + 1, 5)
                 worksheet.set_column(current_col + 2, current_col + 2, 12)
+                worksheet.set_column(current_col + 2, current_col + 3, 20)
+                worksheet.set_column(current_col + 2, current_col + 4, 12)
 
     def writeToFileTeacherDetail(self, buffer, dfs):
         writer = pd.ExcelWriter(buffer, engine='xlsxwriter')
@@ -162,7 +211,7 @@ class TeacherDetailExporter:
             worksheet = workbook.add_worksheet(sheetname)
 
             for r in range(15):
-                for c in range(17):
+                for c in range(27):
                     worksheet.write_blank(r, c, '', self.cell_style)
 
             self.add_headers(worksheet)
@@ -180,19 +229,19 @@ class TeacherDetailExporter:
 
     def addSchoolName(self, schools, worksheet, startrow):
         for idx, data in enumerate(schools):
-            column_idx = 2 + idx * 3
+            column_idx = 2 + idx * 5
             worksheet.write(startrow, column_idx, data, self.header_style)
             worksheet.merge_range(startrow, column_idx,
-                                  startrow, column_idx + 2, None)
+                                  startrow, column_idx + 4, None)
 
     def writePeriodCount(self, periods, worksheet, startrow):
         for idx, data in enumerate(periods):
-            column_idx = 2 + idx * 3
+            column_idx = 2 + idx * 5
             worksheet.write(startrow, column_idx, data, self.header_style)
             worksheet.merge_range(startrow, column_idx,
-                                  startrow, column_idx + 2, None)
+                                  startrow, column_idx + 4, None)
 
-        worksheet.write(startrow, len(periods)*3 + 2,
+        worksheet.write(startrow, len(periods)*5 + 2,
                         sum(periods), self.header_style)
 
     def countClassInSession(self, d):

@@ -18,25 +18,30 @@ from resources.services.matchServiceHelper import run
 
 
 def job(df_truong, df_GVNN, df_GVVN, id):
-    gvnn_result, gvvn_result = run(df_truong, df_GVNN, df_GVVN, id)
+    # gvnn_result, gvvn_result = run(df_truong, df_GVNN, df_GVVN, id)
 
-    df_all_result = pd.concat([gvnn_result, gvvn_result]).reset_index()
+    # df_all_result = pd.concat([gvnn_result, gvvn_result]).reset_index()
 
-    school_detail = SchoolDetailExporter(
-        df_all_result, "TKB chi tiết trường.xlsx")
+    df_all_result = pd.read_excel("D:/[RESULTS] GVVN.xlsx")
+
+    # school_detail = SchoolDetailExporter(
+    #     df_all_result, "TKB chi tiết trường.xlsx")
 
     gvnn_detail = TeacherDetailExporter(
-        gvnn_result, "TKB GVNN - chi tiết.xlsx")
-    gvnn_master = TeacherMasterExporter(
-        gvnn_result, "TKB GVNN - tổng.xlsx")
+        df_all_result, "TKB GVNN - chi tiết.xlsx", TYPE_GVVN)
+    # gvnn_master = TeacherMasterExporter(
+    #     gvnn_result, "TKB GVNN - tổng.xlsx")
 
-    gvvn_detail = TeacherDetailExporter(
-        gvvn_result, "TKB GVVN - chi tiết.xlsx")
-    gvvn_master = TeacherMasterExporter(
-        gvvn_result, "TKB GVVN - tổng.xlsx")
+    # gvvn_detail = TeacherDetailExporter(
+    #     gvvn_result, "TKB GVVN - chi tiết.xlsx")
+    # gvvn_master = TeacherMasterExporter(
+    #     gvvn_result, "TKB GVVN - tổng.xlsx")
+
+    # result_bytes = zipExporters(
+    #     [school_detail, gvnn_detail, gvnn_master, gvvn_detail, gvvn_master])
 
     result_bytes = zipExporters(
-        [school_detail, gvnn_detail, gvnn_master, gvvn_detail, gvvn_master])
+        [gvnn_detail])
 
     schedule_collection.find_one_and_update({"_id": ObjectId(
         id)}, {'$set': {"status": SCHEDULE_STATUS["FINISHED"], "data": result_bytes}})
@@ -44,10 +49,11 @@ def job(df_truong, df_GVNN, df_GVVN, id):
 
 def match(school_data, teacher_domestic_data, teacher_foreign_data) -> bytes:
     tqdm.pandas()
-    df_truong = readDataframeFrombase64(school_data['data'])
-    df_GVVN = readDataframeFrombase64(
-        teacher_domestic_data['data'])
-    df_GVNN = readDataframeFrombase64(teacher_foreign_data['data'])
+    df_truong, df_GVNN, df_GVVN = None, None, None
+    # df_truong = readDataframeFrombase64(school_data['data'])
+    # df_GVVN = readDataframeFrombase64(
+    #     teacher_domestic_data['data'])
+    # df_GVNN = readDataframeFrombase64(teacher_foreign_data['data'])
 
     result = schedule_collection.insert_one(
         {"status": SCHEDULE_STATUS["PENDING"], "createdDate": datetime.datetime.utcnow()})
@@ -55,7 +61,9 @@ def match(school_data, teacher_domestic_data, teacher_foreign_data) -> bytes:
     id = str(result.inserted_id)
 
     # Start async job
-    thread = Thread(target=job, args=(df_truong, df_GVNN, df_GVVN, id))
-    thread.start()
+    # thread = Thread(target=job, args=(df_truong, df_GVNN, df_GVVN, id))
+    # thread.start()
+
+    job(df_truong, df_GVNN, df_GVVN, id)
 
     return {"id": id}
