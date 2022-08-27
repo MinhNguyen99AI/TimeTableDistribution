@@ -63,6 +63,8 @@ def getClassName(row):
         class_type = 'KH'
     if row["Chuong Trinh"] == "2 Toan":
         class_type = 'T'
+    if row["Chuong Trinh"] == "2 STEM":
+        class_type = 'ST'
 
     return "{}{}{}".format(int(row['Khoi']), class_type, int(row['Lop so']))
 

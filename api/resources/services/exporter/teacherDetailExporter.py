@@ -78,30 +78,32 @@ class TeacherDetailExporter:
                 "Class": None,
                 "Document": None,
                 "Is TA": None,
-                "TA": None,
-                "TA Tel": None
+                "Pair Teacher": None,
+                "Pair Tel": None
             }
         return d
 
-    def getTANameAndStatus(self, teacher, row):
+    def getPairTeacherNameAndStatus(self, teacher, row):
         is_TA = False
-        TA = None
+        pair_teacher = None
         if self.type == TYPE_GVNN:
             if row["Ten Giao Vien Viet Nam"] != NO_TEACHER_NAME:
-                TA = row["Ten Giao Vien Viet Nam"]
+                pair_teacher = row["Ten Giao Vien Viet Nam"]
         else:
             # GVVN
             if row["Ten Giao Vien Viet Nam"] == teacher:
                 if row["Ten Giao Vien Nuoc Ngoai"] == NO_TEACHER_NAME:
                     is_TA = False
                     if row["Ten Giao Vien Tro Giang"] != NO_TEACHER_NAME:
-                        TA = row["Ten Giao Vien Tro Giang"]
+                        pair_teacher = row["Ten Giao Vien Tro Giang"]
                 else:
                     is_TA = True
+                    pair_teacher = row["Ten Giao Vien Nuoc Ngoai"]
             else:
                 is_TA = True
+                pair_teacher = row["Ten Giao Vien Viet Nam"]
 
-        return is_TA, TA
+        return is_TA, pair_teacher
 
     def getTeacherDetailRowsbySession(self, teacher, session):
         gv_detail_dict = []
@@ -115,9 +117,10 @@ class TeacherDetailExporter:
                     self.df["Buổi"] == self.vi_session[session]) & (self.df["Tiet trong buoi"] == period)]
 
             for _, row in sub_df.iterrows():
-                is_TA, TA = self.getTANameAndStatus(teacher, row)
+                is_TA, pair_teacher = self.getPairTeacherNameAndStatus(
+                    teacher, row)
                 d[getDayFromNum(row['Thu'])] = {"Start time": None, 'Class': row['Lớp'],
-                                                'Document': row['Document'], "Is TA": is_TA, 'TA': TA, 'TA Tel': None}
+                                                'Document': row['Document'], "Is TA": is_TA, "Pair Teacher": pair_teacher, "Pair Tel": None}
             gv_detail_dict.append(d)
         return gv_detail_dict
 
@@ -129,7 +132,8 @@ class TeacherDetailExporter:
         worksheet.write(row + 1, col + 1, "Class", self.styles["top_header"])
         worksheet.write(row + 1, col + 2, "Document",
                         self.styles["top_header"])
-        worksheet.write(row + 1, col + 3, "TA", self.styles["top_header"])
+        worksheet.write(row + 1, col + 3, "TA/Main Teacher",
+                        self.styles["top_header"])
         worksheet.write(row + 1, col + 4, "Tel", self.styles["top_header"])
 
     def add_headers(self, worksheet):
@@ -189,9 +193,9 @@ class TeacherDetailExporter:
                 worksheet.write(current_row, current_col + 2,
                                 info["Document"], self.styles["cell"])
                 worksheet.write(current_row, current_col + 3,
-                                info["TA"], self.styles["cell"])
+                                info["Pair Teacher"], self.styles["cell"])
                 worksheet.write(current_row, current_col + 4,
-                                info["TA Tel"], self.styles["cell"])
+                                info["Pair Tel"], self.styles["cell"])
 
                 worksheet.set_column(current_col, current_col, 10)
                 worksheet.set_column(current_col + 1, current_col + 1, 5)
