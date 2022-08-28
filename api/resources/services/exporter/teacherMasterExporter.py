@@ -35,11 +35,13 @@ class TeacherMasterExporter:
             sessions = []
 
             for session in ["Sáng", "Chiều"]:
-                d = {"Tên": teacher, "Buổi": session}
+                d = {
+                    "Tên": teacher,
+                    "Buổi": session
+                }
                 class_per_session = 0
 
-                for day in range(2, 6 + 1):
-
+                for day in range(2, 7 + 1):
                     if self.type == TYPE_GVNN:
                         sub_df = self.df[(self.df["Ten Giao Vien Nuoc Ngoai"] == teacher) & (
                             self.df["Buổi"] == session) & (self.df["Thu"] == day)]
@@ -70,6 +72,7 @@ class TeacherMasterExporter:
             gv_master_dict += sessions
 
         df_gv_master = pd.json_normalize(gv_master_dict)
+        df_gv_master.to_excel("D:/out.xlsx")
         df_gv_master = df_gv_master.set_index(['Tên', "Buổi"])
         df_gv_master.columns = df_gv_master.columns.str.split(".").map(
             lambda x: x if len(x) == 2 else x + [""]*(2-len(x))).map(tuple)

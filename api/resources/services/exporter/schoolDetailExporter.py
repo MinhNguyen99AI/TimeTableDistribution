@@ -42,6 +42,10 @@ class SchoolDetailExporter:
             "6": {
                 "Sáng": {},
                 "Chiều": {}
+            },
+            "7": {
+                "Sáng": {},
+                "Chiều": {}
             }
         }
 
@@ -100,7 +104,7 @@ class SchoolDetailExporter:
             self.add_headers(self.worksheet)
 
             current_col = 2
-            for day in ['2', '3', '4', '5', '6']:
+            for day in ['2', '3', '4', '5', '6', '7']:
                 self.worksheet.write(
                     0, current_col, "Thứ {}".format(day), self.styles["header"])
 

@@ -37,10 +37,10 @@ class TeacherDetailExporter:
                                           'Ten Giao Vien Tro Giang']].values.ravel('K'))
 
         for teacher in teachers:
-            if teacher == LACK_TEACHER_NAME or teacher == NO_TEACHER_NAME:
+            if teacher == LACK_TEACHER_NAME or teacher == NO_TEACHER_NAME or teacher == NOT_PROCESSED_TEACHER_NAME:
                 continue
 
-            metadata = {"Periods Count": [0, 0, 0, 0, 0]}
+            metadata = {"Periods Count": [0, 0, 0, 0, 0, 0]}
             df_detail_list = []
             for session in ["Morning", "Afternoon"]:
                 dict_detail = self.getTeacherDetailRowsbySession(
@@ -61,7 +61,7 @@ class TeacherDetailExporter:
         else:
             sub_df = self.df[((self.df["Ten Giao Vien Viet Nam"] == teacher) | (self.df["Ten Giao Vien Tro Giang"] == teacher)) & (
                 self.df["Buổi"] == self.vi_session[session])].groupby("Thu").first()["Ten Truong"]
-        school = [None] * 5
+        school = [None] * 6
         for day, row in zip(sub_df.index.tolist(), sub_df):
             school[int(day) - 2] = row
         return school
@@ -72,7 +72,7 @@ class TeacherDetailExporter:
             "Periods": period
         }
 
-        for day in range(2, 7):
+        for day in range(2, 8):
             d[getDayFromNum(day)] = {
                 "Start time": None,
                 "Class": None,
@@ -173,10 +173,11 @@ class TeacherDetailExporter:
         self.writeDayRow(worksheet, 0, 12, "Wednesday")
         self.writeDayRow(worksheet, 0, 17, "Thursday")
         self.writeDayRow(worksheet, 0, 22, "Friday")
+        self.writeDayRow(worksheet, 0, 27, "Saturday")
 
     def writeSessionData(self, worksheet, df, start_row):
         for row in df:
-            for idx, day in enumerate(["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]):
+            for idx, day in enumerate(["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]):
                 info = row[day]
                 current_row = start_row + row["Periods"]
                 current_col = 2 + idx * 5
@@ -209,10 +210,10 @@ class TeacherDetailExporter:
         self.setCellsFormat(workbook)
 
         for sheetname, (df_morning, df_afternoon, metadata) in dfs.items():
-            worksheet = workbook.add_worksheet(sheetname)
+            worksheet = workbook.add_worksheet(sheetname[:31])
 
             for r in range(16):
-                for c in range(27):
+                for c in range(32):
                     worksheet.write_blank(r, c, '', self.styles["cell"])
 
             self.add_headers(worksheet)
@@ -260,7 +261,7 @@ class TeacherDetailExporter:
         df.columns = df.columns.str.split(".").map(tuple)
 
         classCountByDay = []
-        for day in range(2, 6 + 1):
+        for day in range(2, 7 + 1):
             classCountByDay.append(
                 df[getDayFromNum(day)]["Class"].notnull().sum())
 

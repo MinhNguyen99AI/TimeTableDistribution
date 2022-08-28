@@ -22,7 +22,7 @@ def job(df_truong, df_GVNN, df_GVVN, id):
 
     # df_all_result = pd.concat([gvnn_result, gvvn_result]).reset_index()
 
-    df_all_result = pd.read_excel("D:/[RESULTS] GVVN.xlsx")
+    df_all_result = pd.read_excel("D:/[RESULTS] GVNN.xlsx")
 
     school_detail = SchoolDetailExporter(
         df_all_result, "TKB chi tiết trường.xlsx")
