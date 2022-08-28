@@ -189,17 +189,29 @@ class TeacherDetailExporter:
 
                 worksheet.write(current_row, current_col,
                                 info["Start time"], self.styles["cell"])
-                worksheet.write(current_row, current_col + 1,
-                                info["Class"], class_style)
-                worksheet.write(current_row, current_col + 2,
-                                info["Document"], self.styles["cell"])
-                worksheet.write(current_row, current_col + 3,
-                                info["Pair Teacher"], self.styles["cell"])
+
+                try:
+                    worksheet.write(current_row, current_col + 1,
+                                    info["Class"], class_style)
+                except:
+                    pass
+
+                try:
+                    worksheet.write(current_row, current_col + 2,
+                                    info["Document"], self.styles["cell"])
+                except:
+                    pass
+
+                try:
+                    worksheet.write(current_row, current_col + 3,
+                                    info["Pair Teacher"], self.styles["cell"])
+                except:
+                    pass
                 worksheet.write(current_row, current_col + 4,
                                 info["Pair Tel"], self.styles["cell"])
 
                 worksheet.set_column(current_col, current_col, 10)
-                worksheet.set_column(current_col + 1, current_col + 1, 5)
+                worksheet.set_column(current_col + 1, current_col + 1, 8)
                 worksheet.set_column(current_col + 2, current_col + 2, 12)
                 worksheet.set_column(current_col + 3, current_col + 3, 25)
                 worksheet.set_column(current_col + 4, current_col + 4, 15)

@@ -66,7 +66,7 @@ def getClassName(row):
     if row["Chuong Trinh"] == "2 STEM":
         class_type = 'ST'
 
-    return "{}{}{}".format(int(row['Khoi']), class_type, int(row['Lop so']))
+    return "{}-{}-{}".format(class_type, int(row['Khoi']), row['Lop so'])
 
 
 def getTeacherName(name):
