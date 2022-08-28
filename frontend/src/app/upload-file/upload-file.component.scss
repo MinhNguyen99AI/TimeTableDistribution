@@ -1,0 +1,82 @@
+$theme:       #2C8E71;
+app-upload-file-zone {
+    width: 100%;
+}
+
+.body{
+    .merge-file-img{
+        text-align: center;
+        align-items: center;
+        margin-bottom: 7vh;
+        .merge-file-img-title{
+            font-family: 'Mulish';
+            font-style: normal;
+            font-weight: 900;
+            font-size: 40px;
+            line-height: 50px;
+            text-transform: capitalize;
+
+            color: #24272C;
+        }
+    }
+    .upload-file{
+        display: flex;
+        justify-content: space-around;
+    }
+    .merge-btn{
+        padding-top: 40px;
+        text-align: center;
+        .merge-file-btn{
+            appearance: none;
+            background-color: $theme;
+            border: 1px solid rgba(27, 31, 35, .15);
+            border-radius: 6px;
+            box-shadow: rgba(27, 31, 35, .1) 0 1px 0;
+            box-sizing: border-box;
+            color: #fff;
+            cursor: pointer;
+            display: inline-block;
+            font-family: inherit;
+            font-size: 30px;
+            font-weight: 400;
+            line-height: 20px;
+            padding: 6px 16px;
+            position: relative;
+            text-align: center;
+            text-decoration: none;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: manipulation;
+            vertical-align: middle;
+            white-space: nowrap;
+            width: 180px;
+            height: 60px;
+
+            .merge-file-btn:focus:not(:focus-visible):not(.focus-visible) {
+                box-shadow: none;
+                outline: none;
+            }
+            
+            .merge-file-btn:hover {
+                background-color: #2c974b;
+            }
+            
+            .merge-file-btn:focus {
+                box-shadow: rgba(46, 164, 79, .4) 0 0 0 3px;
+                outline: none;
+            }
+        
+            .merge-file-btn:disabled {
+                background-color: #94d3a2;
+                border-color: rgba(27, 31, 35, .1);
+                color: rgba(255, 255, 255, .8);
+                cursor: default;
+            }
+        
+            .merge-file-btn:active {
+                background-color: #298e46;
+                box-shadow: rgba(20, 70, 32, .2) 0 1px 0 inset;
+            }
+        }
+    }
+}

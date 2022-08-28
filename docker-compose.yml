@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  timetable-api-container:
+    image: timetable-flask-api:1.0.0
+    container_name: timetable-api-container
+    ports:
+      - 5000:5000
+    environment:
+      MONGODB_URL: mongodb://timetable-mongo-container:27017/
+    networks:
+      - timetable-network
+  
+  timetable-mongo-container:
+    image: mongo:5.0.11
+    restart: always
+    container_name: timetable-mongo-container
+
+    ports:
+      - 27017:27017
+    volumes:
+      - timetable-mongo-volume:/var/lib/mongodb
+      - timetable-mongo-volume-config:/etc/mongodb
+    networks:
+      - timetable-network
+  timetable-front-end-container:
+    image: timetable-angular-front-end:1.0.0
+    container_name: timetable-front-end-container
+    ports:
+      - 4200:80
+    volumes:
+      - ./app:/usr/local/app
+      - /usr/local/app/node_modules
+    networks:
+      - timetable-network
+networks:
+  timetable-network:
+    name: timetable-network
+volumes:
+  timetable-mongo-volume:
+  timetable-mongo-volume-config:
