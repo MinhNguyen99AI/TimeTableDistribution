@@ -2,11 +2,9 @@
     <div class="error">
         <img src="./assets/img-error.png" alt="" class="img-error">
     </div>
-    <h1 mat-dialog-title>Unable to open a file</h1>
+    <h1 mat-dialog-title>Có lỗi xảy ra</h1>
     <div class="content">
-        <p>Unable to open file {{data.message}}.<br>
-            That might be the file is not excel.
-        </p>
+        <p>{{data.message}}</p>
     </div>
     <div class="close">
         <button class="btn-close" (click)="close()">OK</button>

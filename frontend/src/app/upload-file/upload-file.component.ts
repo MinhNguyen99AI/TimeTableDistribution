@@ -33,7 +33,7 @@ export class UploadFileComponent implements OnInit {
     console.log("Merge button click!");
     if (this.files.length !== 3) {
       this.dialog.open(PopupComponent,{ data: {
-        message:  "You not upload enough file"
+        message:  "Chưa upload đủ 3 file."
       }});
     }
     let request: UploadFileRequest = {};

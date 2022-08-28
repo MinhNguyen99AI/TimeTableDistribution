@@ -40,7 +40,7 @@ export class UploadFileZoneComponent implements OnInit {
 
       if (!_.includes(af, file.type)) {
         this.dialog.open(PopupComponent,{ data: {
-          message:  file.name
+          message: "File không phải định dạng excel. Không thể mở file " + file.name + "."
         }, panelClass: 'custom-dialog-container'});
       } else {
 
